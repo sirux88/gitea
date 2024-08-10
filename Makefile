@@ -778,6 +778,11 @@ generate-backend: $(TAGS_PREREQ) generate-go
 .PHONY: generate-go
 generate-go: $(TAGS_PREREQ)
 	@echo "Running go generate..."
+	@echo "EXTRA_GOFLAGS: '$(EXTRA_GOFLAGS)'"
+	@echo "GOFLAGS: '$(GOFLAGS)'"
+	@echo "TAGS_PREREQ: '$(TAGS_PREREQ)'"
+	@echo "EXECUTABLE: '$(EXECUTABLE)'"
+	@echo "GO: '$(GO)'"
 	@CC= GOOS= GOARCH= CGO_ENABLED=0 $(GO) generate -tags '$(TAGS)' ./...
 
 .PHONY: security-check
