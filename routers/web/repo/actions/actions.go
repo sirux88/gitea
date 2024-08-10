@@ -160,12 +160,11 @@ func List(ctx *context.Context) {
 	actorID := ctx.FormInt64("actor")
 	status := ctx.FormInt("status")
 
-	idx := sort.Search(len(workflows), func(i int) bool {
-		return workflows[i].File >= workflow
-	})
-
-	if idx > 0 {
-		ctx.Data["CurWorkflow"] = workflows[idx-1]
+	if workflow != "" {
+		idx := sort.Search(len(workflows), func(i int) bool {
+			return workflows[i].File >= workflow
+		})
+		ctx.Data["CurWorkflow"] = workflows[idx]
 	} else {
 		ctx.Data["CurWorkflow"] = Workflow{}
 	}
