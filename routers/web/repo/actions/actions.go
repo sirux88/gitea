@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 
 	actions_model "code.gitea.io/gitea/models/actions"
@@ -32,6 +33,8 @@ const (
 
 type Workflow struct {
 	Entry  git.TreeEntry
+	Name   string
+	File   string
 	ErrMsg string
 }
 
@@ -56,6 +59,7 @@ func MustEnableActions(ctx *context.Context) {
 }
 
 func List(ctx *context.Context) {
+
 	ctx.Data["Title"] = ctx.Tr("actions.actions")
 	ctx.Data["PageIsActions"] = true
 
@@ -99,6 +103,8 @@ func List(ctx *context.Context) {
 				return
 			}
 			wf, err := model.ReadWorkflow(bytes.NewReader(content))
+			workflow.Name = wf.Name
+			workflow.File = entry.Name()
 			if err != nil {
 				workflow.ErrMsg = ctx.Locale.TrString("actions.runs.invalid_workflow_helper", err.Error())
 				workflows = append(workflows, workflow)
@@ -153,7 +159,15 @@ func List(ctx *context.Context) {
 	workflow := ctx.FormString("workflow")
 	actorID := ctx.FormInt64("actor")
 	status := ctx.FormInt("status")
-	ctx.Data["CurWorkflow"] = workflow
+
+	if workflow != "" {
+		idx := sort.Search(len(workflows), func(i int) bool {
+			return workflows[i].File >= workflow
+		})
+		ctx.Data["CurWorkflow"] = workflows[idx]
+	} else {
+		ctx.Data["CurWorkflow"] = Workflow{}
+	}
 
 	actionsConfig := ctx.Repo.Repository.MustGetUnit(ctx, unit.TypeActions).ActionsConfig()
 	ctx.Data["ActionsConfig"] = actionsConfig
